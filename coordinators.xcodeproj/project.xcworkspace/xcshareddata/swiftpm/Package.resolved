@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CombineExt",
+        "repositoryURL": "https://github.com/CombineCommunity/CombineExt",
+        "state": {
+          "branch": null,
+          "revision": "0880829102152185190064fd17847a7c681d2127",
+          "version": "1.5.1"
+        }
+      },
+      {
+        "package": "CombineExtensions",
+        "repositoryURL": "https://github.com/EtneteraMobile/CombineExtensions",
+        "state": {
+          "branch": "main",
+          "revision": "ca751decd4a29ff534a4f2cb078b67b0df6019db",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
