@@ -54,10 +54,9 @@ private extension Coordinating {
             .flatMap { _ in
                 coordinator.start(with: input)
             }
-            .flatMap { [weak self] result -> AnyPublisher<T.CoordinationResult, Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.remove(coordinator)
-                    .map { result }
+            .flatMap(weak: self) { unwrappedSelf, coordinationResult in
+                unwrappedSelf.remove(coordinator)
+                    .map { coordinationResult }
                     .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
@@ -70,16 +69,32 @@ public extension Coordinating {
         with input: T.CoordinationInput,
         animated: Bool
     ) -> AnyPublisher<PushCoordinationResult<U>, Never> where U == T.CoordinationResult {
-        AnyPublisher.create { [weak self] subscriber in
-            self?.router.push(
-                coordinator.presentable,
-                animated: true,
-                pushCompletion: nil,
-                popCompletion: nil
-            )
+        // no retain cycle
+//        push(coordinator.presentable, animated: true)
+//            .map { _ in PushCoordinationResult.dismissed(withGesture: true) }
+//            .eraseToAnyPublisher()
 
-            return AnyCancellable {}
-        }
+        push(coordinator.presentable, animated: animated)
+            .flatMap(
+                weak: self
+            ) { [weak coordinator] unwrappedSelf, pushAction -> AnyPublisher<PushCoordinationResult<U>, Never> in
+                guard let coordinator = coordinator else {
+                    print("WTF")
+                    return Empty().eraseToAnyPublisher()
+                }
+
+                switch pushAction {
+                case .pushed:
+                    return unwrappedSelf.coordinate(to: coordinator, with: input)
+                        .map(PushCoordinationResult.finished)
+                        .eraseToAnyPublisher()
+                case .popped:
+                    break
+                }
+
+                return Empty().eraseToAnyPublisher()
+            }
+
 //        push(coordinator.presentable, animated: animated)
 //            .flatMap { [weak self] pushAction -> AnyPublisher<PushCoordinationResult<U>, Never> in
 //                guard let self = self else { return Empty().eraseToAnyPublisher() }
@@ -117,12 +132,8 @@ private extension Coordinating {
             self?.router.push(
                 presentable,
                 animated: animated,
-                pushCompletion: {
-                    subscriber.send(.pushed)
-                },
-                popCompletion: {
-                    subscriber.send(.popped)
-                }
+                pushCompletion: { subscriber.send(.pushed) },
+                popCompletion: { subscriber.send(.popped) }
             )
 
             return AnyCancellable {}

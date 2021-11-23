@@ -7,6 +7,7 @@
 
 import Coordinator
 import Combine
+import CombineExtensions
 import UIKit
 
 final class AppCoordinator: Coordinating {
@@ -36,22 +37,13 @@ final class AppCoordinator: Coordinating {
 
 private extension AppCoordinator {
     func handleActions(from viewModel: ViewController) {
-//        viewModel.pushButtonTapped
-//            .sink { [weak self] _ in
-//                let vc = ViewController()
-//                self?.router.push(
-//                    vc.presentable,
-//                    animated: true,
-//                    pushCompletion: nil,
-//                    popCompletion: nil
-//                )
-//            }
-//            .store(in: &cancellables)
-
         viewModel.pushButtonTapped
-            .flatMap { [weak self] _ -> AnyPublisher<PushCoordinationResult<TestingCoordinator.CoordinationResult>, Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.push(TestingCoordinator(router: self.router), with: .init(), animated: true)
+            .flatMap(weak: self) { unwrappedSelf, _ in
+                unwrappedSelf.push(
+                    TestingCoordinator(router: unwrappedSelf.router),
+                    with: .init(),
+                    animated: true
+                )
             }
             .sink()
             .store(in: &cancellables)

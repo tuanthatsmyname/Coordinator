@@ -21,6 +21,8 @@ final class TestingCoordinator: Coordinating {
         viewController
     }()
 
+    private var cancellables = Set<AnyCancellable>()
+
     init(router: Routing) {
         self.router = router
     }
@@ -28,17 +30,28 @@ final class TestingCoordinator: Coordinating {
     func start(with input: CoordinationInput) -> AnyPublisher<CoordinationResult, Never> {
         handleActions()
 
-        return Empty(completeImmediately: false).eraseToAnyPublisher()
+
+
+        return viewController.closeButtonTapped
+            .flatMap(weak: self) { unwrappedSelf, _ -> AnyPublisher<Void, Never> in
+                // this should be done in the parent coordinator
+                AnyPublisher<Void, Never>.create { subscriber in
+                    subscriber.send(unwrappedSelf.router.pop(animated: true))
+                    return AnyCancellable {}
+                }
+            }
+            .print("close")
+            .map { CoordinationResult.closed }
+            .eraseToAnyPublisher()
     }
 
-    private func handleActions() {
-//        viewController.presentButtonTapped
-//
-//        viewController.pushButtonTapped
-    }
+    private func handleActions() {}
 }
 
 extension TestingCoordinator {
     struct CoordinationInput {}
-    struct CoordinationResult {}
+
+    enum CoordinationResult {
+        case closed
+    }
 }
