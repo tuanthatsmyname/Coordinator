@@ -11,10 +11,11 @@ import CombineExtensions
 import UIKit
 
 final class AppCoordinator: Coordinating {
-    let childCoordinatorsStorage = CoordinatorStorage()
-    let router: Routing
-    var presentable: UIViewController = UIViewController() // TODO:
+    var presentable: UIViewController = UIViewController()
 
+    let childCoordinatorsStorage = CoordinatorStorage()
+
+    let router: Routing
     private var cancellables = Set<AnyCancellable>()
 
     init(router: Routing) {
@@ -24,10 +25,11 @@ final class AppCoordinator: Coordinating {
     func start(with input: CoordinationInput) -> AnyPublisher<CoordinationResult, Never> {
         let viewController = ViewController()
         router.setRootModule(viewController.presentable)
+
         input.window?.rootViewController = router.navigationController
         input.window?.makeKeyAndVisible()
 
-        handleActions(from: viewController)
+        handleActions(from: viewController, on: router.navigationController)
 
         return Empty(completeImmediately: false).eraseToAnyPublisher()
     }
@@ -36,13 +38,15 @@ final class AppCoordinator: Coordinating {
 }
 
 private extension AppCoordinator {
-    func handleActions(from viewModel: ViewController) {
+    func handleActions(
+        from viewModel: ViewController,
+        on navigationController: UINavigationController
+    ) {
         viewModel.pushButtonTapped
             .flatMap(weak: self) { unwrappedSelf, _ in
-                unwrappedSelf.push(
-                    TestingCoordinator(router: unwrappedSelf.router),
-                    with: .init(),
-                    animated: true
+                unwrappedSelf.coordinate(
+                    to: TestingCoordinator(router: unwrappedSelf.router),
+                    with: .init()
                 )
             }
             .sink()

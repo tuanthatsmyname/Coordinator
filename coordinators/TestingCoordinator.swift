@@ -10,16 +10,14 @@ import Combine
 import UIKit
 
 final class TestingCoordinator: Coordinating {
-    let router: Routing
-    let childCoordinatorsStorage = CoordinatorStorage()
-
-    lazy var viewController: ViewController = {
-        ViewController()
-    }()
+    private let viewController = ViewController()
 
     lazy var presentable: UIViewController = {
         viewController
     }()
+
+    let childCoordinatorsStorage = CoordinatorStorage()
+    let router: Routing
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -28,19 +26,15 @@ final class TestingCoordinator: Coordinating {
     }
 
     func start(with input: CoordinationInput) -> AnyPublisher<CoordinationResult, Never> {
-        handleActions()
-
-
+        router.push(presentable, animated: true, pushCompletion: nil, popCompletion: nil)
 
         return viewController.closeButtonTapped
-            .flatMap(weak: self) { unwrappedSelf, _ -> AnyPublisher<Void, Never> in
-                // this should be done in the parent coordinator
-                AnyPublisher<Void, Never>.create { subscriber in
-                    subscriber.send(unwrappedSelf.router.pop(animated: true))
-                    return AnyCancellable {}
+            .first()
+            .handleEvents(
+                receiveOutput: { [weak self] in
+                    self?.router.pop(animated: true)
                 }
-            }
-            .print("close")
+            )
             .map { CoordinationResult.closed }
             .eraseToAnyPublisher()
     }

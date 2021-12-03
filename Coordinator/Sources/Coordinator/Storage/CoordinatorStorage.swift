@@ -9,7 +9,7 @@ import Foundation
 
 // TODO: protocol
 public final class CoordinatorStorage {
-    private var coordinators: [AnyObject] = []
+    private var coordinators = [AnyObject]()
 
     public init() {}
 
@@ -19,7 +19,6 @@ public final class CoordinatorStorage {
 
     func remove(_ coordinator: AnyObject) {
         coordinators.removeAll { $0 === coordinator }
-        print("counter: \(coordinators.count)")
     }
 
     func removeAll() {

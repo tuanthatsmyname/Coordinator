@@ -13,8 +13,8 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
-    private let appRouter = Router()
-    private var appCoordinator: AppCoordinator?
+    private lazy var appRouter = Router()
+    private lazy var appCoordinator = AppCoordinator(router: appRouter)
     private var cancellables = Set<AnyCancellable>()
 
     func scene(
@@ -26,8 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = scene as? UIWindowScene else { return }
         window = UIWindow(windowScene: scene)
 
-        appCoordinator = AppCoordinator(router: appRouter)
-        appCoordinator?.start(with: .init(window: window))
+        appCoordinator.start(with: .init(window: window))
             .sink()
             .store(in: &cancellables)
     }
