@@ -26,15 +26,8 @@ final class TestingCoordinator: Coordinating {
     }
 
     func start(with input: CoordinationInput) -> AnyPublisher<CoordinationResult, Never> {
-        router.push(presentable, animated: true, pushCompletion: nil, popCompletion: nil)
-
-        return viewController.closeButtonTapped
+        viewController.closeButtonTapped
             .first()
-            .handleEvents(
-                receiveOutput: { [weak self] in
-                    self?.router.pop(animated: true)
-                }
-            )
             .map { CoordinationResult.closed }
             .eraseToAnyPublisher()
     }

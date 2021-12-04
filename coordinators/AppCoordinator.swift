@@ -44,10 +44,44 @@ private extension AppCoordinator {
     ) {
         viewModel.pushButtonTapped
             .flatMap(weak: self) { unwrappedSelf, _ in
-                unwrappedSelf.coordinate(
-                    to: TestingCoordinator(router: unwrappedSelf.router),
-                    with: .init()
+                unwrappedSelf.push(
+                    TestingCoordinator(router: unwrappedSelf.router),
+                    with: .init(),
+                    animated: true
                 )
+            }
+            .filter { result in
+                if case .finished = result {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            .eraseType()
+            .flatMap(weak: self) { unwrappedSelf, _ in
+                unwrappedSelf.pop(animated: true)
+            }
+            .sink()
+            .store(in: &cancellables)
+
+        viewModel.presentButtonTapped
+            .flatMap(weak: self) { unwrappedSelf, _ in
+                unwrappedSelf.present(
+                    TestingCoordinator(router: unwrappedSelf.router),
+                    with: .init(),
+                    animated: true
+                )
+            }
+            .filter { result in
+                if case .finished = result {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            .eraseType()
+            .flatMap(weak: self) { unwrappedSelf, _ in
+                unwrappedSelf.dismiss(animated: true)
             }
             .sink()
             .store(in: &cancellables)

@@ -54,22 +54,21 @@ public final class Router: NSObject, Routing {
     ) {
         let viewController = module.presentable
 
-//        if let popCompletion = popCompletion {
-//            closures.updateValue(popCompletion, forKey: viewController.description)
-//        }
+        if let popCompletion = popCompletion {
+            closures.updateValue(popCompletion, forKey: viewController.description)
+        }
 
         navigationController.pushViewController(viewController, animated: animated)
 
-//        if let pushCompletion = pushCompletion {
-//            pushCompletion()
-//        }
+        if let pushCompletion = pushCompletion {
+            pushCompletion()
+        }
     }
 
     public func pop(animated: Bool) {
-        navigationController.popViewController(animated: animated)
-//        if let viewController = navigationController.popViewController(animated: animated) {
-//            executeCompletion(for: viewController.description) // TODO: do we really want this?
-//        }
+        if let viewController = navigationController.popViewController(animated: animated) {
+            executeCompletion(for: viewController.description) // TODO: do we really want this?
+        }
     }
 
     public func setRootModule(_ module: Presentable) {
