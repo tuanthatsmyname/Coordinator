@@ -21,3 +21,16 @@ public protocol Coordinating: AnyObject, Presentable {
 public extension Coordinating {
     func stop() {}
 }
+
+public extension Coordinating {
+    func coordinate<T: Coordinating>(
+        to coordinator: T,
+        with input: T.CoordinationInput
+    ) -> AnyPublisher<T.CoordinationResult, Never> {
+        return store(coordinator)
+            .flatMap(weak: self, weak: coordinator) { unwrappedSelf, coordinator, _ in
+                unwrappedSelf.start(coordinator, with: input)
+            }
+            .eraseToAnyPublisher()
+    }
+}

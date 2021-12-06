@@ -27,7 +27,7 @@ public extension Coordinating {
             .flatMap(weak: self, weak: coordinator) { unwrappedSelf, coordinator, pushAction in
                 switch pushAction {
                 case .pushed:
-                    return unwrappedSelf.coordinate(to: coordinator, with: input)
+                    return unwrappedSelf.start(coordinator, with: input)
                         .map(PushCoordinationResult.finished)
                         .eraseToAnyPublisher()
                 case .poppedWithGesture:

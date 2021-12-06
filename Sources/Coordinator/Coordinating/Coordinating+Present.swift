@@ -27,7 +27,7 @@ public extension Coordinating {
             .flatMap(weak: self, weak: coordinator) { unwrappedSelf, coordinator, presentAction in
                 switch presentAction {
                 case .presented:
-                    return unwrappedSelf.coordinate(to: coordinator, with: input)
+                    return unwrappedSelf.start(coordinator, with: input)
                         .map(PresentCoordinationResult.finished)
                         .eraseToAnyPublisher()
                 case .dismissedWithGesture:

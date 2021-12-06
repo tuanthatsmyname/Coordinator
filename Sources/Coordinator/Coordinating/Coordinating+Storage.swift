@@ -30,8 +30,8 @@ extension Coordinating {
         }
     }
 
-    func coordinate<T: Coordinating>(
-        to coordinator: T,
+    func start<T: Coordinating>(
+        _ coordinator: T,
         with input: T.CoordinationInput
     ) -> AnyPublisher<T.CoordinationResult, Never> {
         coordinator.start(with: input)
